@@ -1,0 +1,20 @@
+---
+server:
+  port: 8020
+
+---
+
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.31.154:5432/chatonmap
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: 123456
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+
+#hibernate:
+#  show_sql: true
