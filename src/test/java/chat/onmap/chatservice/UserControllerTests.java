@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ChatServiceApplicationTests {
+class UserControllerTests {
 
     @Autowired
     private MockMvc mvc;
@@ -76,6 +76,11 @@ class ChatServiceApplicationTests {
         assertThat(result).isNotNull();
         assertThat(result.getUuid()).isEqualTo(ivan.getUuid());
         assertThat(result.getName()).isEqualTo("Stepan");
+    }
+
+
+    void getMessages(){
+
     }
 
 }

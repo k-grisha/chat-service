@@ -1,4 +1,4 @@
-package chat.onmap.chatservice.mapper;
+package chat.onmap.chatservice.rest.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

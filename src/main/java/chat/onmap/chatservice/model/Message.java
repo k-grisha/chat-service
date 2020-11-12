@@ -19,8 +19,8 @@ public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID uuid;
-    private UUID author;
+    private long id;
+    private UUID sender;
     private UUID recipient;
     private String message;
 }
