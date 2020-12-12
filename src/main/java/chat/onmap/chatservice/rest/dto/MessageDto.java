@@ -1,6 +1,7 @@
 package chat.onmap.chatservice.rest.dto;
 
 import java.util.UUID;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,8 @@ public class MessageDto {
     public final UUID sender;
     @NotNull
     public final UUID recipient;
+    @Min(1)
+    public final int type;
     @NotBlank
-    public final String message;
-
+    public final String body;
 }

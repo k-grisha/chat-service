@@ -1,8 +1,8 @@
 package chat.onmap.chatservice.services;
 
-import static chat.onmap.chatservice.rest.BaseResponse.ErrorCodes.INVALID_VALUE;
-import static chat.onmap.chatservice.rest.BaseResponse.ErrorCodes.NOT_FOUND;
-import static chat.onmap.chatservice.rest.BaseResponse.ErrorCodes.USER_ALREADY_EXIST;
+
+import static chat.onmap.chatservice.exception.ChatOnMapException.ErrorCodes.NOT_FOUND;
+import static chat.onmap.chatservice.exception.ChatOnMapException.ErrorCodes.USER_ALREADY_EXIST;
 
 import chat.onmap.chatservice.exception.ChatOnMapException;
 import chat.onmap.chatservice.model.ChatUser;

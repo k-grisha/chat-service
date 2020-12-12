@@ -29,8 +29,8 @@ class MessageRepositoryTest {
         List<Message> messages = messageRepository
             .findAllByRecipientAndIdIsAfter(recipient, savedMessage1.getId());
         assertThat(messages).hasSize(2);
-        assertThat(messages.get(0).getMessage()).isEqualTo(msg2.getMessage());
-        assertThat(messages.get(1).getMessage()).isEqualTo(msg3.getMessage());
+        assertThat(messages.get(0).getBody()).isEqualTo(msg2.getBody());
+        assertThat(messages.get(1).getBody()).isEqualTo(msg3.getBody());
     }
 
     private Message generateDetachedMessageForRecipient(UUID recipient) {
@@ -38,7 +38,7 @@ class MessageRepositoryTest {
         return Message.builder()
             .recipient(recipient)
             .sender(UUID.randomUUID())
-            .message(UUID.randomUUID().toString())
+            .body(UUID.randomUUID().toString())
             .build();
     }
 }

@@ -22,5 +22,6 @@ public class Message {
     private long id;
     private UUID sender;
     private UUID recipient;
-    private String message;
+    private MessageType type;
+    private String body;
 }

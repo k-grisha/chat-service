@@ -1,8 +1,10 @@
 package chat.onmap.chatservice.rest.controller;
 
+import chat.onmap.chatservice.model.MessageType;
 import chat.onmap.chatservice.rest.dto.MessageDto;
 import chat.onmap.chatservice.rest.mapper.MessageMapper;
 import chat.onmap.chatservice.services.MessageService;
+import chat.onmap.chatservice.services.handlers.MsgHandlersRegistry;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +25,12 @@ public class MessageController {
 
     private final MessageMapper mapper = Mappers.getMapper(MessageMapper.class);
     private final MessageService messageService;
+    private final MsgHandlersRegistry msgHandlersRegistry;
 
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService,
+        MsgHandlersRegistry msgHandlersRegistry) {
         this.messageService = messageService;
+        this.msgHandlersRegistry = msgHandlersRegistry;
     }
 
     @GetMapping("message/{userId}")
@@ -36,7 +41,10 @@ public class MessageController {
 
     @PostMapping("message/{userId}")
     public MessageDto saveMessage(@PathVariable(name = "userId") UUID userId, @RequestBody MessageDto messageDto) {
-        return mapper.map(messageService.saveMessage(userId, mapper.map(messageDto)));
+        // todo add security verification of userId
+
+        return mapper.map(
+            MessageType.valueOf(messageDto.type).getHandler(msgHandlersRegistry).handleMsg(mapper.map(messageDto)));
     }
 
 }

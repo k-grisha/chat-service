@@ -1,21 +1,8 @@
 package chat.onmap.chatservice.services;
 
-import chat.onmap.chatservice.model.Message;
-import chat.onmap.chatservice.model.MessageEvent;
 import chat.onmap.chatservice.repository.MessageRepository;
-import chat.onmap.chatservice.rest.dto.MessageDto;
 import chat.onmap.chatservice.rest.mapper.MessageMapper;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.web.context.request.async.DeferredResult;
 
 //@Service
 //@Slf4j

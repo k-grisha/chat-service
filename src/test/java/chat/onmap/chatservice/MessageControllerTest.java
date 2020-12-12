@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import chat.onmap.chatservice.model.MessageType;
 import chat.onmap.chatservice.repository.MessageRepository;
-import chat.onmap.chatservice.rest.BaseResponse;
 import chat.onmap.chatservice.rest.dto.MessageDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,19 +38,20 @@ public class MessageControllerTest {
 
     @Test
     void getMessageAsync() throws Exception {
-        MessageDto messageDto = MessageDto.builder()
+        MessageDto baseMsgDto = MessageDto.builder()
             .sender(UUID.randomUUID())
             .recipient(UUID.randomUUID())
-            .message("Hi!")
+            .type(MessageType.TEXT_MSG.val)
+            .body("Hi!")
             .build();
-        MvcResult mvcResult = mvc.perform(get("/api/v1/message/{uuid}", messageDto.recipient)
+        MvcResult mvcResult = mvc.perform(get("/api/v1/message/{uuid}", baseMsgDto.recipient)
             .param("lastId", "0"))
             .andDo(print())
             .andExpect(request().asyncStarted())
             .andReturn();
 
-        mvc.perform(post("/api/v1/message/{uuid}", messageDto.sender)
-            .content(objectMapper.writeValueAsString(messageDto))
+        mvc.perform(post("/api/v1/message/{uuid}", baseMsgDto.sender)
+            .content(objectMapper.writeValueAsString(baseMsgDto))
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk());
@@ -63,17 +64,15 @@ public class MessageControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
-        var message = objectMapper.readValue(json, new TypeReference<BaseResponse<List<MessageDto>>>() {
+        var message = objectMapper.readValue(json, new TypeReference<List<MessageDto>>() {
         });
 
         assertThat(message).isNotNull();
-        assertThat(message.isSuccess()).isTrue();
-        assertThat(message.getBody()).isNotNull();
-        assertThat(message.getBody().size()).isEqualTo(1);
-        assertThat(message.getBody().get(0).id).isNotNull();
-        assertThat(message.getBody().get(0).recipient).isEqualTo(messageDto.recipient);
-        assertThat(message.getBody().get(0).sender).isEqualTo(messageDto.sender);
-        assertThat(message.getBody().get(0).message).isEqualTo(messageDto.message);
+        assertThat(message.size()).isEqualTo(1);
+        assertThat(message.get(0).id).isNotNull();
+        assertThat(message.get(0).recipient).isEqualTo(baseMsgDto.recipient);
+        assertThat(message.get(0).sender).isEqualTo(baseMsgDto.sender);
+        assertThat(message.get(0).body).isEqualTo(baseMsgDto.body);
 
     }
 

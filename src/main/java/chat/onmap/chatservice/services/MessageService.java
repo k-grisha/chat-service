@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -26,15 +25,12 @@ public class MessageService {
     private final Map<UUID, MessagesRequest> waitingRequests = new ConcurrentHashMap<>();
     private final MessageMapper mapper = Mappers.getMapper(MessageMapper.class);
     private final MessageRepository messageRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
-    public MessageService(MessageRepository messageRepository,
-        ApplicationEventPublisher eventPublisher) {
+    public MessageService(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        this.eventPublisher = eventPublisher;
     }
 
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     // todo get rid of DTO
     public DeferredResult<List<MessageDto>> getMessages(final UUID userId, final Long startId) {
         DeferredResult<List<MessageDto>> deferredResult = getDeferredResult(userId);
@@ -45,14 +41,6 @@ public class MessageService {
             waitingRequests.put(userId, new MessagesRequest(startId, deferredResult));
         }
         return deferredResult;
-    }
-
-
-    @Transactional
-    public Message saveMessage(final UUID userId, final Message message) {
-        var savedMessage = messageRepository.save(message);
-        eventPublisher.publishEvent(new MessageEvent(savedMessage));
-        return savedMessage;
     }
 
     @TransactionalEventListener(fallbackExecution = true)

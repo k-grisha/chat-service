@@ -8,10 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import chat.onmap.chatservice.model.ChatUser;
 import chat.onmap.chatservice.repository.UserRepository;
-import chat.onmap.chatservice.rest.BaseResponse;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +42,7 @@ class UserControllerTests {
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        var result = objectMapper.readValue(json, new TypeReference<BaseResponse<ChatUser>>() {
-        }).getBody();
+        var result = objectMapper.readValue(json, ChatUser.class);
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo(ivan.getName());
         assertThat(result.getUuid()).isEqualTo(ivan.getUuid());
@@ -54,12 +50,12 @@ class UserControllerTests {
 
     @Test
     void saveUserTest() throws Exception {
-        var json = mvc.perform(post("/api/v1/user").content("{\"name\": \"qweasd\"}").contentType(MediaType.APPLICATION_JSON_VALUE))
+        var json = mvc.perform(
+            post("/api/v1/user").content("{\"name\": \"qweasd\"}").contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        var result = objectMapper.readValue(json, new TypeReference<BaseResponse<ChatUser>>() {
-        }).getBody();
+        var result = objectMapper.readValue(json, ChatUser.class);
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("qweasd");
     }
@@ -67,20 +63,16 @@ class UserControllerTests {
     @Test
     void updateUserTest() throws Exception {
         var ivan = userRepository.save(ChatUser.builder().name("Ivan").build());
-        var json = mvc.perform(put("/api/v1/user/{uuid}", ivan.getUuid()).content("{\"name\": \"Stepan\"}").contentType(MediaType.APPLICATION_JSON_VALUE))
+        var json = mvc.perform(put("/api/v1/user/{uuid}", ivan.getUuid()).content("{\"name\": \"Stepan\"}")
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
-        var result = objectMapper.readValue(json, new TypeReference<BaseResponse<ChatUser>>() {
-        }).getBody();
+        var result = objectMapper.readValue(json, ChatUser.class);
         assertThat(result).isNotNull();
         assertThat(result.getUuid()).isEqualTo(ivan.getUuid());
         assertThat(result.getName()).isEqualTo("Stepan");
     }
 
-
-    void getMessages(){
-
-    }
 
 }
