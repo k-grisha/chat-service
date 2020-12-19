@@ -5,6 +5,14 @@ server:
 ---
 
 spring:
+  application:
+    name: "chat-service"
+  boot:
+    admin:
+      client:
+        instance:
+          prefer-ip: true
+        url: http://192.168.31.154:8100
   datasource:
     url: jdbc:postgresql://192.168.31.154:5432/chatonmap
     driverClassName: org.postgresql.Driver
@@ -15,6 +23,20 @@ spring:
     hibernate:
       ddl-auto: validate
 
+
+logging:
+  pattern:
+    file: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID}){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+  level:
+    root: INFO
+  file:
+    name: "/var/log/chat-service/chat-service.log"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
 #hibernate:
 #  show_sql: true

@@ -16,8 +16,7 @@ public class TextMsgHandler implements MsgHandler {
     private final MessageRepository messageRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    public TextMsgHandler(MessageRepository messageRepository,
-        ApplicationEventPublisher eventPublisher) {
+    public TextMsgHandler(MessageRepository messageRepository, ApplicationEventPublisher eventPublisher) {
         this.messageRepository = messageRepository;
         this.eventPublisher = eventPublisher;
     }
@@ -25,6 +24,10 @@ public class TextMsgHandler implements MsgHandler {
     @Override
     @Transactional
     public Message handleMsg(Message msg) {
+        if(msg.getBody().trim().isBlank()){
+            log.warn("empty message declined");
+            return msg;
+        }
         var savedMessage = messageRepository.save(msg);
         eventPublisher.publishEvent(new MessageEvent(savedMessage));
         return savedMessage;
