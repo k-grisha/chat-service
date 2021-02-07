@@ -2,8 +2,8 @@ package chat.onmap.chatservice.services.handlers.impl;
 
 import chat.onmap.chatservice.model.Message;
 import chat.onmap.chatservice.model.MessageEvent;
+import chat.onmap.chatservice.model.MessageType.MsgHandler;
 import chat.onmap.chatservice.repository.MessageRepository;
-import chat.onmap.chatservice.services.handlers.MsgHandlersRegistry.MsgHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class TextMsgHandler implements MsgHandler {
 
     @Override
     @Transactional
-    public Message handleMsg(Message msg) {
+    public Message handleIncomeMsg(Message msg) {
         if(msg.getBody().trim().isBlank()){
             log.warn("empty message declined");
             return msg;

@@ -8,6 +8,7 @@ import chat.onmap.chatservice.rest.mapper.MessageMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Slf4j
 public class MessageService {
 
-    private final Map<UUID, MessagesRequest> waitingRequests = new ConcurrentHashMap<>();
+    private final Map<UUID, MessagesRequest> waitingRequestsMap = new ConcurrentHashMap<>();
     private final MessageMapper mapper = Mappers.getMapper(MessageMapper.class);
     private final MessageRepository messageRepository;
 
@@ -38,7 +39,7 @@ public class MessageService {
         if (!messages.isEmpty()) {
             deferredResult.setResult(mapper.map(messages));
         } else {
-            waitingRequests.put(userId, new MessagesRequest(startId, deferredResult));
+            waitingRequestsMap.put(userId, new MessagesRequest(startId, deferredResult));
         }
         return deferredResult;
     }
@@ -47,12 +48,14 @@ public class MessageService {
     public void onNewMessage(MessageEvent event) {
         log.debug("onNewMessage: {}", event);
         if (event.getRecipient() != null) {
-            MessagesRequest waitingRequest = waitingRequests.get(event.getRecipient());
-            if (waitingRequest != null) {
-                List<Message> messages = messageRepository
-                    .findAllByRecipientAndIdIsAfter(event.getRecipient(), waitingRequest.lastMsgId);
-                waitingRequest.deferredResult.setResult(mapper.map(messages));
-            }
+            Optional.ofNullable(waitingRequestsMap.get(event.getRecipient()))
+                .ifPresentOrElse(waitingRequest -> {
+                    List<Message> messages = messageRepository
+                        .findAllByRecipientAndIdIsAfter(event.getRecipient(), waitingRequest.lastMsgId);
+                    waitingRequest.deferredResult.setResult(mapper.map(messages));
+                }, () -> {
+                    System.out.println(event);
+                });
         }
     }
 
@@ -60,11 +63,11 @@ public class MessageService {
         DeferredResult<List<MessageDto>> deferredResult = new DeferredResult<>(null, Collections.emptyList());
         deferredResult.onCompletion(() -> {
             log.debug("Complete messages request for userId: {}", userId);
-            waitingRequests.remove(userId);
+            waitingRequestsMap.remove(userId);
         });
         deferredResult.onError(throwable -> {
             log.error("Error in messages request for userId: {}", userId);
-            waitingRequests.remove(userId);
+            waitingRequestsMap.remove(userId);
         });
         deferredResult.onTimeout(() -> {
             log.debug("Complete messages request by timeout for userId: {}", userId);

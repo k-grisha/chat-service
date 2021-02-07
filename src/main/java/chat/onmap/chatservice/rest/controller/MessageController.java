@@ -44,7 +44,7 @@ public class MessageController {
         // todo add security verification of userId
 
         return mapper.map(
-            MessageType.valueOf(messageDto.type).getHandler(msgHandlersRegistry).handleMsg(mapper.map(messageDto)));
+            MessageType.valueOf(messageDto.type).getHandler(msgHandlersRegistry).handleIncomeMsg(mapper.map(messageDto)));
     }
 
 }

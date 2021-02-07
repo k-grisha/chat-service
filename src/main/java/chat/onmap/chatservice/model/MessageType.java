@@ -1,6 +1,5 @@
 package chat.onmap.chatservice.model;
 
-import chat.onmap.chatservice.services.handlers.MsgHandlersRegistry.MsgHandler;
 
 public enum MessageType {
     TEXT_MSG(1) {
@@ -16,15 +15,13 @@ public enum MessageType {
             return registry.getUnknownMsgHandler();
         }
     };
-//        PHOTO_MSG(2),
-//        MSG_STATUS(3);
+
 
     MessageType(int val) {
         this.val = val;
     }
 
     public final int val;
-
 
     public abstract MsgHandler getHandler(IncomingDataHandlersRegistry registry);
 
@@ -36,7 +33,6 @@ public enum MessageType {
             }
         }
         return UNKNOWN_MSG;
-//        throw new IllegalArgumentException("No matching constant for [" + longPoolType + "]");
     }
 
 
@@ -47,4 +43,8 @@ public enum MessageType {
         MsgHandler getUnknownMsgHandler();
     }
 
+    public interface MsgHandler {
+
+        Message handleIncomeMsg(Message msg);
+    }
 }
