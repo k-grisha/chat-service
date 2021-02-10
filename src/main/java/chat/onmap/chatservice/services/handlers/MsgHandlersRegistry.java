@@ -1,29 +1,29 @@
 package chat.onmap.chatservice.services.handlers;
 
 import chat.onmap.chatservice.model.MessageType.IncomingDataHandlersRegistry;
-import chat.onmap.chatservice.model.MessageType.MsgHandler;
-import chat.onmap.chatservice.services.handlers.impl.TextMsgHandler;
-import chat.onmap.chatservice.services.handlers.impl.UnknownMsgHandler;
+import chat.onmap.chatservice.model.MessageType.MsgHandlerStrategy;
+import chat.onmap.chatservice.services.handlers.impl.TextMsgHandlerStrategy;
+import chat.onmap.chatservice.services.handlers.impl.UnknownMsgHandlerStrategy;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MsgHandlersRegistry implements IncomingDataHandlersRegistry {
 
-    private final TextMsgHandler textMsgHandler;
-    private final UnknownMsgHandler unknownMsgHandler;
+    private final TextMsgHandlerStrategy textMsgHandler;
+    private final UnknownMsgHandlerStrategy unknownMsgHandler;
 
-    public MsgHandlersRegistry(TextMsgHandler textMsgHandler, UnknownMsgHandler unknownMsgHandler) {
+    public MsgHandlersRegistry(TextMsgHandlerStrategy textMsgHandler, UnknownMsgHandlerStrategy unknownMsgHandler) {
         this.textMsgHandler = textMsgHandler;
         this.unknownMsgHandler = unknownMsgHandler;
     }
 
     @Override
-    public MsgHandler getTextMessageHandler() {
+    public MsgHandlerStrategy getTextMessageHandler() {
         return textMsgHandler;
     }
 
     @Override
-    public MsgHandler getUnknownMsgHandler() {
+    public MsgHandlerStrategy getUnknownMsgHandler() {
         return unknownMsgHandler;
     }
 

@@ -2,7 +2,7 @@ package chat.onmap.chatservice.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import chat.onmap.chatservice.model.Message;
+import chat.onmap.chatservice.model.MessageEntity;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -17,7 +17,7 @@ class MessageRepositoryTest {
     private MessageRepository messageRepository;
 
     @Test
-    public void test() {
+    public void messageRepositoryTest() {
         var recipient = UUID.randomUUID();
         var msg1 = generateDetachedMessageForRecipient(recipient);
         var msg2 = generateDetachedMessageForRecipient(recipient);
@@ -26,18 +26,17 @@ class MessageRepositoryTest {
         messageRepository.save(msg2);
         messageRepository.save(msg3);
 
-        List<Message> messages = messageRepository
-            .findAllByRecipientAndIdIsAfter(recipient, savedMessage1.getId());
-        assertThat(messages).hasSize(2);
-        assertThat(messages.get(0).getBody()).isEqualTo(msg2.getBody());
-        assertThat(messages.get(1).getBody()).isEqualTo(msg3.getBody());
+        List<MessageEntity> messageEntities = messageRepository
+            .findAllByRecipientIdAndIdIsAfter(recipient, savedMessage1.getId());
+        assertThat(messageEntities).hasSize(2);
+        assertThat(messageEntities.get(0).getBody()).isEqualTo(msg2.getBody());
+        assertThat(messageEntities.get(1).getBody()).isEqualTo(msg3.getBody());
     }
 
-    private Message generateDetachedMessageForRecipient(UUID recipient) {
-        var rnd = new Random();
-        return Message.builder()
-            .recipient(recipient)
-            .sender(UUID.randomUUID())
+    private MessageEntity generateDetachedMessageForRecipient(UUID recipientId) {
+        return MessageEntity.builder()
+            .recipientId(recipientId)
+            .senderId(UUID.randomUUID())
             .body(UUID.randomUUID().toString())
             .build();
     }

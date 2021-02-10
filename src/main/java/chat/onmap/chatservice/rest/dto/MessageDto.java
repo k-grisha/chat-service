@@ -13,9 +13,9 @@ public class MessageDto {
 
     public final long id;
     @NotNull
-    public final UUID sender;
+    public final UUID senderId;
     @NotNull
-    public final UUID recipient;
+    public final UUID recipientId;
     @Min(1)
     public final int type;
     @NotBlank

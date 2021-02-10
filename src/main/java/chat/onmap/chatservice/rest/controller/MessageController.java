@@ -25,12 +25,9 @@ public class MessageController {
 
     private final MessageMapper mapper = Mappers.getMapper(MessageMapper.class);
     private final MessageService messageService;
-    private final MsgHandlersRegistry msgHandlersRegistry;
 
-    public MessageController(MessageService messageService,
-        MsgHandlersRegistry msgHandlersRegistry) {
+    public MessageController(MessageService messageService) {
         this.messageService = messageService;
-        this.msgHandlersRegistry = msgHandlersRegistry;
     }
 
     @GetMapping("message/{userId}")
@@ -40,11 +37,9 @@ public class MessageController {
     }
 
     @PostMapping("message/{userId}")
-    public MessageDto saveMessage(@PathVariable(name = "userId") UUID userId, @RequestBody MessageDto messageDto) {
+    public MessageDto handleMessage(@PathVariable(name = "userId") UUID userId, @RequestBody MessageDto messageDto) {
         // todo add security verification of userId
-
-        return mapper.map(
-            MessageType.valueOf(messageDto.type).getHandler(msgHandlersRegistry).handleIncomeMsg(mapper.map(messageDto)));
+        return mapper.map(messageService.handleIncomeMsg(mapper.map(messageDto)));
     }
 
 }

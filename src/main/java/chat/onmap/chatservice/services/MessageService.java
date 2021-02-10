@@ -1,10 +1,11 @@
 package chat.onmap.chatservice.services;
 
-import chat.onmap.chatservice.model.Message;
+import chat.onmap.chatservice.model.MessageEntity;
 import chat.onmap.chatservice.model.MessageEvent;
 import chat.onmap.chatservice.repository.MessageRepository;
 import chat.onmap.chatservice.rest.dto.MessageDto;
 import chat.onmap.chatservice.rest.mapper.MessageMapper;
+import chat.onmap.chatservice.services.handlers.MsgHandlersRegistry;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,43 +24,56 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Slf4j
 public class MessageService {
 
-    private final Map<UUID, MessagesRequest> waitingRequestsMap = new ConcurrentHashMap<>();
+    private final Map<UUID, WaitingRequest> waitingRequestsMap = new ConcurrentHashMap<>();
     private final MessageMapper mapper = Mappers.getMapper(MessageMapper.class);
     private final MessageRepository messageRepository;
+    private final FireBaseService fireBaseService;
+    private final MsgHandlersRegistry msgHandlersRegistry;
 
-    public MessageService(MessageRepository messageRepository) {
+    public MessageService(MessageRepository messageRepository, FireBaseService fireBaseService,
+        MsgHandlersRegistry msgHandlersRegistry) {
         this.messageRepository = messageRepository;
+        this.fireBaseService = fireBaseService;
+        this.msgHandlersRegistry = msgHandlersRegistry;
     }
 
     @Transactional(readOnly = true)
     // todo get rid of DTO
     public DeferredResult<List<MessageDto>> getMessages(final UUID userId, final Long startId) {
-        DeferredResult<List<MessageDto>> deferredResult = getDeferredResult(userId);
-        List<Message> messages = messageRepository.findAllByRecipientAndIdIsAfter(userId, startId);
-        if (!messages.isEmpty()) {
-            deferredResult.setResult(mapper.map(messages));
+        DeferredResult<List<MessageDto>> deferredResult = buildDeferredResult(userId);
+        List<MessageEntity> messageEntities = messageRepository.findAllByRecipientIdAndIdIsAfter(userId, startId);
+        if (!messageEntities.isEmpty()) {
+            deferredResult.setResult(mapper.map(messageEntities));
         } else {
-            waitingRequestsMap.put(userId, new MessagesRequest(startId, deferredResult));
+            waitingRequestsMap.put(userId, new WaitingRequest(userId, startId, deferredResult));
         }
         return deferredResult;
+    }
+
+    public MessageEntity handleIncomeMsg(MessageEntity messageEntity) {
+        return messageEntity.getType().getHandler(msgHandlersRegistry).handleIncomeMsg(messageEntity);
     }
 
     @TransactionalEventListener(fallbackExecution = true)
     public void onNewMessage(MessageEvent event) {
         log.debug("onNewMessage: {}", event);
-        if (event.getRecipient() != null) {
-            Optional.ofNullable(waitingRequestsMap.get(event.getRecipient()))
-                .ifPresentOrElse(waitingRequest -> {
-                    List<Message> messages = messageRepository
-                        .findAllByRecipientAndIdIsAfter(event.getRecipient(), waitingRequest.lastMsgId);
-                    waitingRequest.deferredResult.setResult(mapper.map(messages));
-                }, () -> {
-                    System.out.println(event);
-                });
+        if (event.getRecipientId() != null) {
+            Optional.ofNullable(waitingRequestsMap.get(event.getRecipientId()))
+                .ifPresentOrElse(this::sendMessage, () -> sendNotification(event));
         }
     }
 
-    private DeferredResult<List<MessageDto>> getDeferredResult(UUID userId) {
+    private void sendMessage(WaitingRequest waitingRequest) {
+        List<MessageEntity> messageEntities = messageRepository
+            .findAllByRecipientIdAndIdIsAfter(waitingRequest.userId, waitingRequest.lastMsgId);
+        waitingRequest.deferredResult.setResult(mapper.map(messageEntities));
+    }
+
+    private void sendNotification(MessageEvent messageEvent) {
+        messageEvent.getType().getHandler(msgHandlersRegistry).handleNotification(messageEvent);
+    }
+
+    private DeferredResult<List<MessageDto>> buildDeferredResult(UUID userId) {
         DeferredResult<List<MessageDto>> deferredResult = new DeferredResult<>(null, Collections.emptyList());
         deferredResult.onCompletion(() -> {
             log.debug("Complete messages request for userId: {}", userId);
@@ -76,8 +90,9 @@ public class MessageService {
     }
 
     @AllArgsConstructor
-    private static final class MessagesRequest {
+    private static final class WaitingRequest {
 
+        public UUID userId;
         public final Long lastMsgId;
         public final DeferredResult<List<MessageDto>> deferredResult;
     }

@@ -8,18 +8,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import chat.onmap.chatservice.model.ChatUser;
 import chat.onmap.chatservice.model.MessageType;
 import chat.onmap.chatservice.repository.MessageRepository;
+import chat.onmap.chatservice.repository.UserRepository;
 import chat.onmap.chatservice.rest.dto.MessageDto;
+import chat.onmap.chatservice.services.FireBaseService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,27 +40,33 @@ public class MessageControllerTest {
     private MessageRepository messageRepository;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserRepository userRepository;
+    @MockBean
+    private FireBaseService fireBaseService;
 
     @Test
     void getMessageAsync() throws Exception {
         MessageDto baseMsgDto = MessageDto.builder()
-            .sender(UUID.randomUUID())
-            .recipient(UUID.randomUUID())
+            .senderId(UUID.randomUUID())
+            .recipientId(UUID.randomUUID())
             .type(MessageType.TEXT_MSG.val)
             .body("Hi!")
             .build();
-        MvcResult mvcResult = mvc.perform(get("/api/v1/message/{uuid}", baseMsgDto.recipient)
+        MvcResult mvcResult = mvc.perform(get("/api/v1/message/{uuid}", baseMsgDto.recipientId)
             .param("lastId", "0"))
             .andDo(print())
             .andExpect(request().asyncStarted())
             .andReturn();
 
-        mvc.perform(post("/api/v1/message/{uuid}", baseMsgDto.sender)
+        // when
+        mvc.perform(post("/api/v1/message/{uuid}", baseMsgDto.senderId)
             .content(objectMapper.writeValueAsString(baseMsgDto))
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk());
 
+        // then
         Objects.requireNonNull(mvcResult.getRequest().getAsyncContext()).setTimeout(5000);
         mvcResult.getAsyncResult();
 
@@ -70,10 +81,39 @@ public class MessageControllerTest {
         assertThat(message).isNotNull();
         assertThat(message.size()).isEqualTo(1);
         assertThat(message.get(0).id).isNotNull();
-        assertThat(message.get(0).recipient).isEqualTo(baseMsgDto.recipient);
-        assertThat(message.get(0).sender).isEqualTo(baseMsgDto.sender);
+        assertThat(message.get(0).recipientId).isEqualTo(baseMsgDto.recipientId);
+        assertThat(message.get(0).senderId).isEqualTo(baseMsgDto.senderId);
         assertThat(message.get(0).body).isEqualTo(baseMsgDto.body);
-
+        //and
+        assertThat(messageRepository.findById(message.get(0).id)).isPresent();
     }
+
+
+    @Test
+    public void sendNotificationTest() throws Exception {
+        var offlineUser = userRepository.save(ChatUser.builder()
+            .name(UUID.randomUUID().toString())
+            .fireBaseToken(UUID.randomUUID().toString())
+            .build());
+        MessageDto messageDto = MessageDto.builder()
+            .senderId(UUID.randomUUID())
+            .recipientId(offlineUser.getUuid())
+            .type(MessageType.TEXT_MSG.val)
+            .body("Hi!")
+            .build();
+        //when
+        var json = mvc.perform(post("/api/v1/message/{uuid}", messageDto.senderId)
+            .content(objectMapper.writeValueAsString(messageDto))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andDo(MockMvcResultHandlers.print())
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        var message = objectMapper.readValue(json, MessageDto.class);
+        assertThat(message).isNotNull();
+        assertThat(messageRepository.findById(message.id)).isPresent();
+        Mockito.verify(fireBaseService).sendNotification(offlineUser.getFireBaseToken());
+    }
+
 
 }

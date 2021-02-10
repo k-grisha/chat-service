@@ -8,12 +8,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import chat.onmap.chatservice.model.ChatUser;
 import chat.onmap.chatservice.repository.UserRepository;
+import chat.onmap.chatservice.services.FireBaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -28,7 +31,8 @@ class UserControllerTests {
     private UserRepository userRepository;
     @Autowired
     private ObjectMapper objectMapper;
-
+    @MockBean
+    private FireBaseService fireBaseService;
 
     @BeforeEach
     public void before() {
@@ -37,7 +41,8 @@ class UserControllerTests {
 
     @Test
     void getUserTest() throws Exception {
-        var ivan = userRepository.save(ChatUser.builder().name("Ivan").build());
+        var ivan = userRepository
+            .save(ChatUser.builder().name("Ivan").fireBaseToken(UUID.randomUUID().toString()).build());
         var json = mvc.perform(get("/api/v1/user/{uuid}", ivan.getUuid()))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
@@ -51,7 +56,8 @@ class UserControllerTests {
     @Test
     void saveUserTest() throws Exception {
         var json = mvc.perform(
-            post("/api/v1/user").content("{\"name\": \"qweasd\"}").contentType(MediaType.APPLICATION_JSON_VALUE))
+            post("/api/v1/user").content("{\"name\": \"qweasd\", \"fireBaseToken\": \"asd5432\"}")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
@@ -62,9 +68,11 @@ class UserControllerTests {
 
     @Test
     void updateUserTest() throws Exception {
-        var ivan = userRepository.save(ChatUser.builder().name("Ivan").build());
-        var json = mvc.perform(put("/api/v1/user/{uuid}", ivan.getUuid()).content("{\"name\": \"Stepan\"}")
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+        var ivan = userRepository
+            .save(ChatUser.builder().name("Ivan").fireBaseToken(UUID.randomUUID().toString()).build());
+        var json = mvc.perform(
+            put("/api/v1/user/{uuid}", ivan.getUuid()).content("{\"name\": \"Stepan\", \"fireBaseToken\": \"asd5432\"}")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();

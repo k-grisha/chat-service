@@ -18,13 +18,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
+public class MessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
-    private UUID sender;
-    private UUID recipient;
+    private Long id;
+    private UUID senderId;
+    private UUID recipientId;
     @Enumerated(EnumType.STRING)
     private MessageType type;
     @Column(columnDefinition = "TEXT")

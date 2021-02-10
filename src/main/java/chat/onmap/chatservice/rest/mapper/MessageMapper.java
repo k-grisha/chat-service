@@ -1,6 +1,6 @@
 package chat.onmap.chatservice.rest.mapper;
 
-import chat.onmap.chatservice.model.Message;
+import chat.onmap.chatservice.model.MessageEntity;
 import chat.onmap.chatservice.model.MessageType;
 import chat.onmap.chatservice.rest.dto.MessageDto;
 import java.util.List;
@@ -9,14 +9,11 @@ import org.mapstruct.Mapper;
 @Mapper
 public abstract class MessageMapper {
 
-    //    @Mappings({
-//        @Mapping(target="type", expression = "java( MessageType. )")
-//    })
-    public abstract Message map(MessageDto dto);
+    public abstract MessageEntity map(MessageDto dto);
 
-    public abstract MessageDto map(Message entity);
+    public abstract MessageDto map(MessageEntity entity);
 
-    public abstract List<MessageDto> map(List<Message> entitie);
+    public abstract List<MessageDto> map(List<MessageEntity> entitie);
 
     public MessageType map(int type) {
         return MessageType.valueOf(type);

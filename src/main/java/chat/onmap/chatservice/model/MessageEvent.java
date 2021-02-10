@@ -7,12 +7,16 @@ import lombok.Data;
 public class MessageEvent {
 
     private final long msgId;
-    private final UUID sender;
-    private final UUID recipient;
+    private final UUID senderId;
+    private final UUID recipientId;
+    private final MessageType type;
+    private final String body;
 
-    public MessageEvent(Message message) {
-        this.msgId = message.getId();
-        this.sender = message.getSender();
-        this.recipient = message.getRecipient();
+    public MessageEvent(MessageEntity messageEntity) {
+        this.msgId = messageEntity.getId();
+        this.senderId = messageEntity.getSenderId();
+        this.recipientId = messageEntity.getRecipientId();
+        this.type = messageEntity.getType();
+        this.body = messageEntity.getBody();
     }
 }

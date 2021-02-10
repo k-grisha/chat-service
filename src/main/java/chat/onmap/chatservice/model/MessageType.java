@@ -4,14 +4,14 @@ package chat.onmap.chatservice.model;
 public enum MessageType {
     TEXT_MSG(1) {
         @Override
-        public MsgHandler getHandler(IncomingDataHandlersRegistry registry) {
+        public MsgHandlerStrategy getHandler(IncomingDataHandlersRegistry registry) {
             return registry.getTextMessageHandler();
         }
     },
 
     UNKNOWN_MSG(0) {
         @Override
-        public MsgHandler getHandler(IncomingDataHandlersRegistry registry) {
+        public MsgHandlerStrategy getHandler(IncomingDataHandlersRegistry registry) {
             return registry.getUnknownMsgHandler();
         }
     };
@@ -23,7 +23,7 @@ public enum MessageType {
 
     public final int val;
 
-    public abstract MsgHandler getHandler(IncomingDataHandlersRegistry registry);
+    public abstract MsgHandlerStrategy getHandler(IncomingDataHandlersRegistry registry);
 
 
     public static MessageType valueOf(int longPoolType) {
@@ -38,13 +38,15 @@ public enum MessageType {
 
     public interface IncomingDataHandlersRegistry {
 
-        MsgHandler getTextMessageHandler();
+        MsgHandlerStrategy getTextMessageHandler();
 
-        MsgHandler getUnknownMsgHandler();
+        MsgHandlerStrategy getUnknownMsgHandler();
     }
 
-    public interface MsgHandler {
+    public interface MsgHandlerStrategy {
 
-        Message handleIncomeMsg(Message msg);
+        MessageEntity handleIncomeMsg(MessageEntity msg);
+
+        void handleNotification(MessageEvent msg);
     }
 }
