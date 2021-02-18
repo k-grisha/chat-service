@@ -16,5 +16,5 @@ public class UserDto {
     @Size(min = 3, max = 100, message = "Name length should be from 3 up to 100 symbols")
     public final String name;
     @NotNull(message = "FireBaseToken is mandatory")
-    public final String fireBaseToken;
+    public final String fbsToken;
 }

@@ -56,7 +56,8 @@ class UserControllerTests {
     @Test
     void saveUserTest() throws Exception {
         var json = mvc.perform(
-            post("/api/v1/user").content("{\"name\": \"qweasd\", \"fireBaseToken\": \"asd5432\"}")
+            post("/api/v1/user")
+                .content("{\"name\": \"qweasd\", \"fbsToken\": \"ae446a34-4975-4de1-9c2f-9995859f5d9f\"}")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
@@ -71,7 +72,8 @@ class UserControllerTests {
         var ivan = userRepository
             .save(ChatUser.builder().name("Ivan").fireBaseToken(UUID.randomUUID().toString()).build());
         var json = mvc.perform(
-            put("/api/v1/user/{uuid}", ivan.getUuid()).content("{\"name\": \"Stepan\", \"fireBaseToken\": \"asd5432\"}")
+            put("/api/v1/user/{uuid}", ivan.getUuid())
+                .content("{\"name\": \"Stepan\", \"fbsToken\": \"ae446a34-4975-4de1-9c2f-9995859f5d8f\"}")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())

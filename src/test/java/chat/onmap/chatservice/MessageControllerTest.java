@@ -1,6 +1,8 @@
 package chat.onmap.chatservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -91,13 +93,17 @@ public class MessageControllerTest {
 
     @Test
     public void sendNotificationTest() throws Exception {
-        var offlineUser = userRepository.save(ChatUser.builder()
+        var offlineRecipient = userRepository.save(ChatUser.builder()
             .name(UUID.randomUUID().toString())
             .fireBaseToken(UUID.randomUUID().toString())
             .build());
-        MessageDto messageDto = MessageDto.builder()
-            .senderId(UUID.randomUUID())
-            .recipientId(offlineUser.getUuid())
+        var sender = userRepository.save(ChatUser.builder()
+            .name(UUID.randomUUID().toString())
+            .fireBaseToken(UUID.randomUUID().toString())
+            .build());
+        var messageDto = MessageDto.builder()
+            .senderId(sender.getUuid())
+            .recipientId(offlineRecipient.getUuid())
             .type(MessageType.TEXT_MSG.val)
             .body("Hi!")
             .build();
@@ -112,7 +118,8 @@ public class MessageControllerTest {
         var message = objectMapper.readValue(json, MessageDto.class);
         assertThat(message).isNotNull();
         assertThat(messageRepository.findById(message.id)).isPresent();
-        Mockito.verify(fireBaseService).sendNotification(offlineUser.getFireBaseToken());
+        Mockito.verify(fireBaseService)
+            .sendNotification(eq(offlineRecipient.getFireBaseToken()), anyString(), anyString());
     }
 
 

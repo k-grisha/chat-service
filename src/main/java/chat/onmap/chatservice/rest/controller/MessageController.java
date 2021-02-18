@@ -1,10 +1,8 @@
 package chat.onmap.chatservice.rest.controller;
 
-import chat.onmap.chatservice.model.MessageType;
 import chat.onmap.chatservice.rest.dto.MessageDto;
 import chat.onmap.chatservice.rest.mapper.MessageMapper;
 import chat.onmap.chatservice.services.MessageService;
-import chat.onmap.chatservice.services.handlers.MsgHandlersRegistry;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
