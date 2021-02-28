@@ -12,9 +12,9 @@ spring:
       client:
         instance:
           prefer-ip: true
-        url: http://192.168.31.154:8100
+        url: http://192.168.31.152:8100
   datasource:
-    url: jdbc:postgresql://192.168.31.154:5432/chatonmap
+    url: jdbc:postgresql://192.168.31.152:5432/chatonmap
     driverClassName: org.postgresql.Driver
     username: postgres
     password: 123456

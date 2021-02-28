@@ -23,7 +23,7 @@ public class FireBaseService {
             // todo move to environment variable GOOGLE_APPLICATION_CREDENTIALS
             // export GOOGLE_APPLICATION_CREDENTIALS="/home/user/Downloads/service-account-file.json"
             var is = FireBaseService.class.getClassLoader()
-                .getResourceAsStream("georg-94b06-firebase-adminsdk-8glo3-4dc2d8d797.json");
+                .getResourceAsStream("georg-94b06-firebase-adminsdk-8glo3-da70cef433.json");
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(is))
                 .build();
