@@ -21,10 +21,15 @@ public class ChatUser {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uuid;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private String fireBaseToken;
+    private String email;
+    private String picture;
+    @Column(unique = true, nullable = false)
+    private String fbsUuid;
+    @Column(unique = true, nullable = false)
+    private String fbsMsgToken;
 
 
 }

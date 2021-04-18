@@ -95,11 +95,15 @@ public class MessageControllerTest {
     public void sendNotificationTest() throws Exception {
         var offlineRecipient = userRepository.save(ChatUser.builder()
             .name(UUID.randomUUID().toString())
-            .fireBaseToken(UUID.randomUUID().toString())
+            .fbsMsgToken(UUID.randomUUID().toString())
+            .fbsUuid(UUID.randomUUID().toString())
+            .email(UUID.randomUUID().toString())
             .build());
         var sender = userRepository.save(ChatUser.builder()
             .name(UUID.randomUUID().toString())
-            .fireBaseToken(UUID.randomUUID().toString())
+            .fbsMsgToken(UUID.randomUUID().toString())
+            .fbsUuid(UUID.randomUUID().toString())
+            .email(UUID.randomUUID().toString())
             .build());
         var messageDto = MessageDto.builder()
             .senderId(sender.getUuid())
@@ -119,7 +123,7 @@ public class MessageControllerTest {
         assertThat(message).isNotNull();
         assertThat(messageRepository.findById(message.id)).isPresent();
         Mockito.verify(fireBaseService)
-            .sendNotification(eq(offlineRecipient.getFireBaseToken()), anyString(), anyString());
+            .sendNotification(eq(offlineRecipient.getFbsMsgToken()), anyString(), anyString());
     }
 
 

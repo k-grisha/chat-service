@@ -7,7 +7,9 @@ import static chat.onmap.chatservice.exception.ChatOnMapException.ErrorCodes.USE
 import chat.onmap.chatservice.exception.ChatOnMapException;
 import chat.onmap.chatservice.model.ChatUser;
 import chat.onmap.chatservice.repository.UserRepository;
+import chat.onmap.chatservice.rest.dto.CreateUserDto;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +17,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    @Autowired
+    private  FireBaseService fireBaseService;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     @Transactional
-    public ChatUser saveUser(ChatUser chatUser) {
-        userRepository.findAllByName(chatUser.getName()).ifPresent(user -> {
-            throw new ChatOnMapException("User with name '" + user.getName() + "' already exist", USER_ALREADY_EXIST);
-        });
-
+    public ChatUser saveUser(final String name, final String fbsMsgToken, final String fbsJwt) {
+        var fbsDecodedUser = fireBaseService.verifyDecodeJwt(fbsJwt);
+        var user =  userRepository.findByFbsUuid(fbsDecodedUser.uuid);
+        if (user.isPresent()){
+            return user.get();
+        }
+        var chatUser = ChatUser.builder()
+            .name(name)
+            .email(fbsDecodedUser.email)
+            .fbsUuid(fbsDecodedUser.uuid)
+            .fbsMsgToken(fbsMsgToken)
+            .picture(fbsDecodedUser.picture)
+            .build();
         return userRepository.save(chatUser);
     }
 

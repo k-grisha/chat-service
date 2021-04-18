@@ -1,16 +1,18 @@
 package chat.onmap.chatservice.services;
 
+import chat.onmap.chatservice.exception.ChatOnMapException;
+import chat.onmap.chatservice.exception.ChatOnMapException.ErrorCodes;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URL;
 import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,16 @@ public class FireBaseService {
             FirebaseApp.initializeApp(options);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create FireBaseService", e);
+        }
+    }
+
+    public FbsDecodedUser verifyDecodeJwt(String jwt) {
+        try {
+            var fbsToken = FirebaseAuth.getInstance().verifyIdToken(jwt);
+            return new FbsDecodedUser(fbsToken.getUid(), fbsToken.getEmail(), fbsToken.getPicture());
+        } catch (FirebaseAuthException e) {
+            e.printStackTrace();
+            throw new ChatOnMapException("Unable to verify fbsJwt", ErrorCodes.UNAUTHORIZED);
         }
     }
 
@@ -60,6 +72,14 @@ public class FireBaseService {
         } catch (FirebaseMessagingException e) {
             throw new RuntimeException("Unable to send notification", e);
         }
+    }
+
+    @AllArgsConstructor
+    public static class FbsDecodedUser {
+
+        public final String uuid;
+        public final String email;
+        public final String picture;
     }
 
 }

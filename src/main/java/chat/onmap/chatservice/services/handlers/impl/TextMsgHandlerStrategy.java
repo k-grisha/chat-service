@@ -46,8 +46,8 @@ public class TextMsgHandlerStrategy implements MsgHandlerStrategy {
         userRepository.findById(msg.getSenderId()).ifPresentOrElse(
             sender -> userRepository.findById(msg.getRecipientId()).ifPresentOrElse(
                 recipient -> fireBaseService.sendNotification(
-                    recipient.getFireBaseToken(),
-                    "You'v got a new message fom message from " + sender.getName(),
+                    recipient.getFbsMsgToken(),
+                    "New message from " + sender.getName(),
                     msg.getBody().substring(0, Math.min(msg.getBody().length(), 50))),
                 () -> log.warn("Recipient for notification not found. {}", msg.getRecipientId())
             ),

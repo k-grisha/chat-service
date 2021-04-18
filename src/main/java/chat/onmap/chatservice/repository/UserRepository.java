@@ -8,4 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<ChatUser, UUID> {
 
     Optional<ChatUser> findAllByName(String name);
+    Optional<ChatUser> findByFbsUuid(String fbsUuid);
 }

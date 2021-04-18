@@ -16,6 +16,7 @@ public class ChatOnMapException extends RuntimeException {
     public enum ErrorCodes {
         OK(0),
         INVALID_VALUE(400),
+        UNAUTHORIZED(401),
         NOT_FOUND(404),
         USER_ALREADY_EXIST(409),
         INTERNAL_ERROR(500);
