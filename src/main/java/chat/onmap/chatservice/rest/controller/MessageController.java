@@ -5,6 +5,7 @@ import chat.onmap.chatservice.rest.mapper.MessageMapper;
 import chat.onmap.chatservice.services.MessageService;
 import java.util.List;
 import java.util.UUID;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,13 +30,16 @@ public class MessageController {
     }
 
     @GetMapping("message/{userId}")
+    // todo valid userId
     public DeferredResult<List<MessageDto>> getMessages(@PathVariable(name = "userId") UUID userId,
         @RequestParam(name = "lastId") Long lastId) {
         return messageService.getMessages(userId, lastId);
     }
 
     @PostMapping("message/{userId}")
-    public MessageDto handleMessage(@PathVariable(name = "userId") UUID userId, @RequestBody MessageDto messageDto) {
+    // todo valid userId
+    public MessageDto handleMessage(@PathVariable(name = "userId") UUID userId,
+        @Valid @RequestBody MessageDto messageDto) {
         // todo add security verification of userId
         return mapper.map(messageService.handleIncomeMsg(mapper.map(messageDto)));
     }
